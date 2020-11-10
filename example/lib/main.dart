@@ -111,6 +111,12 @@ class _MyAppState extends State<MyApp> {
                       await DesktopWindow.setFullScreen(false);
                     },
                   ),
+                                    RaisedButton(
+                    child: Text("setOverlay"),
+                    onPressed: () async {
+                      await DesktopWindow.toggleOverlay();
+                    },
+                  ),
                 ],
               ),
             ],

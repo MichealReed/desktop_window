@@ -39,6 +39,10 @@ class DesktopWindow {
     return await _channel.invokeMethod('toggleFullScreen');
   }
 
+    static Future toggleOverlay() async {
+    return await _channel.invokeMethod('toggleOverlay');
+  }
+
   static Future setFullScreen(bool fullscreen) async {
     return await _channel
         .invokeMethod('setFullScreen', {'fullscreen': fullscreen});
