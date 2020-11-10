@@ -290,19 +290,18 @@ namespace
 
       result->Success(flutter::EncodableValue(true));
     }
-    else if (method_call.method_name().compare("toggleOverlay") == 0)
+    else if (method_call.method_name().compare("makeOverlay") == 0)
     {
       if (!overlay)
       {
         HWND handle = GetActiveWindow();
-        int x;
-        int y;
-        GetWindowPos(handle, &x, &y);
-        double width;
-        double height;
-        GetWindowSize(handle, &width, &height);
-        SetWindowPos(handle, HWND_TOPMOST, x, y, (int)width, (int)height, SWP_SHOWWINDOW);
         overlay = true;
+        LONG lStyle = GetWindowLong(handle, GWL_STYLE);
+        lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+        SetWindowLong(handle, GWL_STYLE, lStyle);
+        SetWindowLong(handle, GWL_EXSTYLE, WS_EX_LAYERED);
+        SetLayeredWindowAttributes(handle, RGB(0, 0, 0), 5, LWA_COLORKEY);
+        SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_FRAMECHANGED);
         result->Success(flutter::EncodableValue(true));
       }
       else
@@ -318,6 +317,33 @@ namespace
         overlay = false;
         result->Success(flutter::EncodableValue(false));
       }
+    }
+    else if (method_call.method_name().compare("setWindowPosition") == 0)
+    {
+      double x = 0;
+      double y = 0;
+      const auto *arguments = std::get_if<flutter::EncodableMap>(method_call.arguments());
+      if (arguments)
+      {
+        auto width_it = arguments->find(flutter::EncodableValue("x"));
+        if (width_it != arguments->end())
+        {
+          x = std::get<double>(width_it->second);
+        }
+        auto height_it = arguments->find(flutter::EncodableValue("y"));
+        if (height_it != arguments->end())
+        {
+          y = std::get<double>(height_it->second);
+        }
+      }
+      if (x == 0 || y == 0)
+      {
+        result->Error("argument_error", "width or height not provided");
+        return;
+      }
+      HWND handle = GetActiveWindow();
+      SetWindowPos(handle, NULL, (int)x, (int)y, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_FRAMECHANGED);
+      result->Success(flutter::EncodableValue(true));
     }
     else
     {
