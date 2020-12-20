@@ -303,7 +303,7 @@ namespace
       const auto *arguments = std::get_if<flutter::EncodableMap>(method_call.arguments());
       if (arguments)
       {
-        bool overlay;
+        bool overlay = true;
         auto overlayMap = arguments->find(flutter::EncodableValue("overlay"));
         if (overlayMap != arguments->end())
         {
