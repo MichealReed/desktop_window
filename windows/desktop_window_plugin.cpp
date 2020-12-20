@@ -310,7 +310,6 @@ namespace
           overlay = std::get<bool>(overlayMap->second);
         }
         HWND handle = GetActiveWindow();
-        int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
 
         if (overlay)
         {
