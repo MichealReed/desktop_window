@@ -24,7 +24,6 @@ namespace
   int maxHeight = 0;
   int minWidth = 0;
   int minHeight = 0;
-  bool overlay = false;
 
   class DesktopWindowPlugin : public flutter::Plugin
   {
@@ -301,34 +300,39 @@ namespace
     }
     else if (method_call.method_name().compare("makeOverlay") == 0)
     {
-      HWND handle = GetActiveWindow();
-      int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
-      if ((exStyle & WS_EX_TOPMOST) != WS_EX_TOPMOST)
+      const auto *arguments = std::get_if<flutter::EncodableMap>(method_call.arguments());
+      if (arguments)
       {
-        SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_FRAMECHANGED);
-      }
-      if (!overlay)
-      {
-        overlay = true;
-        LONG lStyle = GetWindowLong(handle, GWL_STYLE);
-        lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
-        SetWindowLong(handle, GWL_STYLE, lStyle);
-        SetWindowLong(handle, GWL_EXSTYLE, WS_EX_LAYERED);
-        SetLayeredWindowAttributes(handle, RGB(0, 0, 0), 5, LWA_COLORKEY);
-        SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_FRAMECHANGED);
-        result->Success(flutter::EncodableValue(true));
-      }
-      else
-      {
-        int x;
-        int y;
-        GetWindowPos(handle, &x, &y);
-        double width;
-        double height;
-        GetWindowSize(handle, &width, &height);
-        SetWindowPos(handle, HWND_NOTOPMOST, x, y, (int)width, (int)height, SWP_SHOWWINDOW);
-        overlay = false;
-        result->Success(flutter::EncodableValue(false));
+        bool overlay;
+        auto overlayMap = arguments->find(flutter::EncodableValue("overlay"));
+        if (overlayMap != arguments->end())
+        {
+          overlay = std::get<bool>(overlayMap->second);
+        }
+        HWND handle = GetActiveWindow();
+        int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
+
+        if (overlay)
+        {
+          LONG lStyle = GetWindowLong(handle, GWL_STYLE);
+          lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+          SetWindowLong(handle, GWL_STYLE, lStyle);
+          SetWindowLong(handle, GWL_EXSTYLE, WS_EX_LAYERED);
+          SetLayeredWindowAttributes(handle, RGB(0, 0, 0), 5, LWA_COLORKEY);
+          SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_FRAMECHANGED);
+          result->Success(flutter::EncodableValue(true));
+        }
+        else
+        {
+          int x;
+          int y;
+          GetWindowPos(handle, &x, &y);
+          double width;
+          double height;
+          GetWindowSize(handle, &width, &height);
+          SetWindowPos(handle, HWND_NOTOPMOST, x, y, (int)width, (int)height, SWP_SHOWWINDOW);
+          result->Success(flutter::EncodableValue(false));
+        }
       }
     }
     else if (method_call.method_name().compare("setWindowPosition") == 0)
