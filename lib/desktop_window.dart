@@ -41,6 +41,14 @@ class DesktopWindow {
     return await _channel.invokeMethod('makeOverlay');
   }
 
+  static Future<Size> getScreenSize() async {
+    final arr = await _channel.invokeMethod('getScreenSize');
+    if (arr is List && arr.length == 2) {
+      return Size(arr[0], arr[1]);
+    }
+    throw arr;
+  }
+
   static Future setWindowPosition(double x, double y) async {
     return await _channel.invokeMethod('setWindowPosition', {'x': x, 'y': y});
   }

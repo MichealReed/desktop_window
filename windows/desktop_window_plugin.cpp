@@ -290,6 +290,15 @@ namespace
 
       result->Success(flutter::EncodableValue(true));
     }
+    else if (method_call.method_name().compare("getScreenSize") == 0)
+    {
+        RECT desktop;
+        const HWND hDesktop = GetDesktopWindow();
+        GetWindowRect(hDesktop, &desktop);
+        double width = desktop.right;
+        double height = desktop.bottom;
+        result->Success(flutter::EncodableValue(flutter::EncodableList{flutter::EncodableValue(width), flutter::EncodableValue(height)}));
+    }
     else if (method_call.method_name().compare("makeOverlay") == 0)
     {
       if (!overlay)
