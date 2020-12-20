@@ -320,7 +320,6 @@ namespace
       }
       else
       {
-        HWND handle = GetActiveWindow();
         int x;
         int y;
         GetWindowPos(handle, &x, &y);
