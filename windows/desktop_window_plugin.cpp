@@ -292,18 +292,23 @@ namespace
     }
     else if (method_call.method_name().compare("getScreenSize") == 0)
     {
-        RECT desktop;
-        const HWND hDesktop = GetDesktopWindow();
-        GetWindowRect(hDesktop, &desktop);
-        double width = desktop.right;
-        double height = desktop.bottom;
-        result->Success(flutter::EncodableValue(flutter::EncodableList{flutter::EncodableValue(width), flutter::EncodableValue(height)}));
+      RECT desktop;
+      const HWND hDesktop = GetDesktopWindow();
+      GetWindowRect(hDesktop, &desktop);
+      double width = desktop.right;
+      double height = desktop.bottom;
+      result->Success(flutter::EncodableValue(flutter::EncodableList{flutter::EncodableValue(width), flutter::EncodableValue(height)}));
     }
     else if (method_call.method_name().compare("makeOverlay") == 0)
     {
+      HWND handle = GetActiveWindow();
+      int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
+      if ((exStyle & WS_EX_TOPMOST) != WS_EX_TOPMOST)
+      {
+        SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_ASYNCWINDOWPOS | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_FRAMECHANGED);
+      }
       if (!overlay)
       {
-        HWND handle = GetActiveWindow();
         overlay = true;
         LONG lStyle = GetWindowLong(handle, GWL_STYLE);
         lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
